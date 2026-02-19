@@ -1,7 +1,18 @@
 #!/bin/bash
+set -e
 echo "Enter project name suffix:"
 read PROJECT_DIR
 PROJECT_DIR="attendance_tracker_$PROJECT_DIR"
+cleanup() {
+  echo ""
+  echo "Script interrupted! Creating archive..."
+  tar -czf "${PROJECT_DIR}_archive.tar.gz" "$PROJECT_DIR" 2>/dev/null || echo "No folder to archive yet."
+  rm -rf "$PROJECT_DIR" 2>/dev/null
+  echo "Archive created and incomplete folder removed."
+  exit 1
+}
+trap cleanup SIGINT
+
 mkdir -p "$PROJECT_DIR/Helpers"
 mkdir -p "$PROJECT_DIR/reports"
 touch "$PROJECT_DIR/attendance_checker.py"
@@ -16,7 +27,7 @@ cat <<EOF > "$PROJECT_DIR/Helpers/config.json"
 }
 EOF
 while true; do
-  echo "Enter new warning threshold (default 75):"
+  echo "Enter new warning threshold:"
   read warn
   warn=${warn:-75}
   if [[ "$warn" =~ ^[0-9]+$ ]] && [ "$warn" -le 100 ] && [ "$warn" -ge 0 ]; then
@@ -27,7 +38,7 @@ while true; do
 done
 
 while true; do
-  echo "Enter new failure threshold (default 50):"
+  echo "Enter new failure threshold:"
   read fail
   fail=${fail:-50}
   if [[ "$fail" =~ ^[0-9]+$ ]] && [ "$fail" -le 100 ] && [ "$fail" -ge 0 ]; then
@@ -44,13 +55,7 @@ then
 else
   echo "Python3 is NOT installed"
 fi
-cleanup() {
-  echo "Script interrupted! Creating archive..."
-  tar -czf "${PROJECT_DIR}_archive.tar.gz" "$PROJECT_DIR"
-  rm -rf "$PROJECT_DIR"
-  echo "Archive created and incomplete folder removed."
-  exit 1
-}
-trap cleanup SIGINT
 
-echo "Project setup complete!"
+echo "Project setup complete! You can now use the project!!"
+chmod +x setup_project.sh
+echo "Setup script is executable."
