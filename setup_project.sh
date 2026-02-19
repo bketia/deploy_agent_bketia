@@ -15,12 +15,27 @@ cat <<EOF > "$PROJECT_DIR/Helpers/config.json"
   "failure_threshold": 50
 }
 EOF
-echo "Enter new warning threshold (default 75):"
-read warn
-echo "Enter new failure threshold (default 50):"
-read fail
-warn=${warn:-75}
-fail=${fail:-50}
+while true; do
+  echo "Enter new warning threshold (default 75):"
+  read warn
+  warn=${warn:-75}
+  if [[ "$warn" =~ ^[0-9]+$ ]] && [ "$warn" -le 100 ] && [ "$warn" -ge 0 ]; then
+    break
+  else
+    echo "Please enter a number between 0 and 100."
+  fi
+done
+
+while true; do
+  echo "Enter new failure threshold (default 50):"
+  read fail
+  fail=${fail:-50}
+  if [[ "$fail" =~ ^[0-9]+$ ]] && [ "$fail" -le 100 ] && [ "$fail" -ge 0 ]; then
+    break
+  else
+    echo "Please enter a number between 0 and 100."
+  fi
+done
 sed -i "s/\"warning_threshold\": 75/\"warning_threshold\": $warn/" "$PROJECT_DIR/Helpers/config.json"
 sed -i "s/\"failure_threshold\": 50/\"failure_threshold\": $fail/" "$PROJECT_DIR/Helpers/config.json"
 if python3 --version >/dev/null 2>&1
